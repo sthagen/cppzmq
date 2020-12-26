@@ -1827,6 +1827,7 @@ class socket_base
             throw error_t();
     }
 
+    ZMQ_DEPRECATED("from 4.7.1, use handle() != nullptr or operator bool")
     bool connected() const ZMQ_NOTHROW { return (_handle != ZMQ_NULLPTR); }
 
     ZMQ_CPP11_DEPRECATED("from 4.3.1, use send taking a const_buffer and send_flags")
@@ -2652,6 +2653,15 @@ template<typename T = no_user_data> class poller_t
 
         throw error_t();
     }
+
+#if ZMQ_VERSION >= ZMQ_MAKE_VERSION(4, 3, 3)
+    size_t size() const noexcept
+    {
+        int rc = zmq_poller_size(const_cast<void *>(poller_ptr.get()));
+        ZMQ_ASSERT(rc >= 0);
+        return static_cast<size_t>(std::max(rc, 0));
+    }
+#endif
 
   private:
     struct destroy_poller_t
